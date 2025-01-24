@@ -6,9 +6,6 @@ pool:
 
 variables:
   pythonVersion: '3.9'
-  dockerRegistryServiceConnection: 'DockerHub'  # El nombre de la conexión de servicio Docker (Docker Hub o ACR)
-  dockerRepository: 'wilsong7578/laboratorio11-web'  # Repositorio donde se almacenará la imagen Docker
-  appServiceName: 'Laboratorio11'  # Nombre de tu App Service
 
 steps:
 - task: UsePythonVersion@0
@@ -30,17 +27,10 @@ steps:
 
 - task: Docker@2
   inputs:
-    containerRegistry: '$(dockerRegistryServiceConnection)'  # Conexión al registro Docker
-    repository: '$(dockerRepository)'  # Nombre del repositorio donde se almacena la imagen Docker
+    containerRegistry: 'DockerHubConnection'  # Aquí usa el nombre correcto de tu conexión
+    repository: '$(dockerRepository)'
     command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
+    Dockerfile: 'Dockerfile'
     tags: |
-      $(Build.BuildId)  # Usamos el ID de la build como etiqueta para la imagen
+      $(Build.BuildId)
   displayName: 'Build and push Docker image'
-
-- task: AzureWebApp@1
-  inputs:
-    appName: '$(appServiceName)'  # Nombre de tu App Service en Azure
-    package: '$(Build.ArtifactStagingDirectory)/$(dockerRepository):$(Build.BuildId)'  # Ruta al artefacto Docker
-    appSettings: '-DOCKER_CUSTOM_IMAGE_NAME $(dockerRegistryServiceConnection)/$(dockerRepository):$(Build.BuildId)'  # Establecemos la imagen Docker en los settings
-  displayName: 'Deploy to Azure App Service'
